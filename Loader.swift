@@ -165,17 +165,17 @@ extension UIView
             UIColor.backgroundFadedGrey().CGColor
         ]
         
-        gradient.locations = [NSNumber(double: -1.25),NSNumber(double:-1.25),NSNumber(double:0),NSNumber(double: 0.25),NSNumber(double: 1.25)]
+        let startLocations = [NSNumber(double: -1.25),NSNumber(double:-1.25),NSNumber(double:0),NSNumber(double: 0.25),NSNumber(double: 1.25)]
         
+        
+        gradient.locations = startLocations
         let gradientAnimation = CABasicAnimation(keyPath: "locations")
-        gradientAnimation.fromValue = [NSNumber(double: 0.0),NSNumber(double:0.0),NSNumber(double:0.10),NSNumber(double: 0.25),NSNumber(double: 1)]
-        
+        gradientAnimation.fromValue = startLocations
         gradientAnimation.toValue = [NSNumber(double: 0),NSNumber(double:1),NSNumber(double:1),NSNumber(double: 1.15),NSNumber(double: 1.25)]
         
         gradientAnimation.repeatCount = Float.infinity
         gradientAnimation.fillMode = kCAFillModeForwards
         gradientAnimation.removedOnCompletion = false
-        
         gradientAnimation.duration = 1
         gradient.addAnimation(gradientAnimation ,forKey:"locations")
         
