@@ -122,10 +122,22 @@ class CutoutView : UIView
     }
 }
 
-var cutoutHandle: UInt8 = 0
-var gradientHandle: UInt8 = 0
-var loaderDuration = 1.0
+// TODO :- Allow caller to tweak these
 
+var cutoutHandle: UInt8         = 0
+var gradientHandle: UInt8       = 0
+var loaderDuration              = 0.85
+var gradientWidth               = 0.17
+var gradientFirstStop           = 0.1
+
+extension CGFloat
+{
+    func doubleValue()->Double
+    {
+        return Double(self)
+    }
+    
+}
 
 extension UIView
 {
@@ -173,8 +185,8 @@ extension UIView
     
     func configureAndAddAnimationToGradient(let gradient : CAGradientLayer)
     {
-        gradient.startPoint = CGPointMake(-1.25, 0)
-        gradient.endPoint = CGPointMake(1.25, 0)
+        gradient.startPoint = CGPointMake(-1.0 + CGFloat(gradientWidth), 0)
+        gradient.endPoint = CGPointMake(1.0 + CGFloat(gradientWidth), 0)
         
         gradient.colors = [
             UIColor.backgroundFadedGrey().CGColor,
@@ -184,13 +196,13 @@ extension UIView
             UIColor.backgroundFadedGrey().CGColor
         ]
         
-        let startLocations = [NSNumber(double: -1.25),NSNumber(double:-1.25),NSNumber(double:0),NSNumber(double: 0.25),NSNumber(double: 1.25)]
+        let startLocations = [NSNumber(double: gradient.startPoint.x.doubleValue()),NSNumber(double:gradient.startPoint.x.doubleValue()),NSNumber(double:0),NSNumber(double: gradientWidth),NSNumber(double: 1 + gradientWidth)]
         
         
         gradient.locations = startLocations
         let gradientAnimation = CABasicAnimation(keyPath: "locations")
         gradientAnimation.fromValue = startLocations
-        gradientAnimation.toValue = [NSNumber(double: 0),NSNumber(double:1),NSNumber(double:1),NSNumber(double: 1.15),NSNumber(double: 1.25)]
+        gradientAnimation.toValue = [NSNumber(double: 0),NSNumber(double:1),NSNumber(double:1),NSNumber(double: 1 + (gradientWidth - gradientFirstStop)),NSNumber(double: 1 + gradientWidth)]
         
         gradientAnimation.repeatCount = Float.infinity
         gradientAnimation.fillMode = kCAFillModeForwards
@@ -209,7 +221,7 @@ extension UIView
         cutout.frame = self.bounds
         cutout.backgroundColor = UIColor.clearColor()
         
-        self.insertSubview(cutout, atIndex: 1)
+        self.addSubview(cutout)
         cutout.setNeedsDisplay()
         cutout.boundInside(self)
         
