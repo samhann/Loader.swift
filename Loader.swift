@@ -51,7 +51,17 @@ extension UIColor {
     }
 }
 
-
+extension UIView{
+    
+    func boundInside(superView: UIView){
+        
+        self.translatesAutoresizingMaskIntoConstraints = false
+        superView.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|-0-[subview]-0-|", options: NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics:nil, views:["subview":self]))
+        superView.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|-0-[subview]-0-|", options: NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics:nil, views:["subview":self]))
+        
+        
+    }
+}
 
 public class Loader
 {
@@ -103,10 +113,19 @@ class CutoutView : UIView
             }
         }
     }
+    
+    
+    override func layoutSubviews() {
+        
+        self.setNeedsDisplay()
+        self.superview?.ld_getGradient()?.frame = (self.superview?.bounds)!
+    }
 }
 
 var cutoutHandle: UInt8 = 0
 var gradientHandle: UInt8 = 0
+var loaderDuration = 1.0
+
 
 extension UIView
 {
@@ -176,8 +195,9 @@ extension UIView
         gradientAnimation.repeatCount = Float.infinity
         gradientAnimation.fillMode = kCAFillModeForwards
         gradientAnimation.removedOnCompletion = false
-        gradientAnimation.duration = 1
+        gradientAnimation.duration = loaderDuration
         gradient.addAnimation(gradientAnimation ,forKey:"locations")
+        
         
         self.ld_setGradient(gradient)
         
@@ -191,13 +211,15 @@ extension UIView
         
         self.insertSubview(cutout, atIndex: 1)
         cutout.setNeedsDisplay()
-        
+        cutout.boundInside(self)
         
         for view in self.subviews {
             if view != cutout {
                 view.alpha = 0
             }
         }
+        
+        
         self.ld_setCutoutView(cutout)
     }
 }
