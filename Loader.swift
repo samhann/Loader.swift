@@ -8,8 +8,12 @@
 
 import UIKit
 
+@objc public protocol ListLoadable
+{
+    func ld_visibleContentViews()->[UIView]
+}
 
-public extension UITableView
+extension UITableView : ListLoadable
 {
     public func ld_visibleContentViews()->[UIView]
     {
@@ -19,7 +23,7 @@ public extension UITableView
     }
 }
 
-public extension UICollectionView
+extension UICollectionView : ListLoadable
 {
     public func ld_visibleContentViews()->[UIView]
     {
@@ -51,40 +55,32 @@ extension UIColor {
 
 public class Loader
 {
-    public static func addLoaderToViews(let views : [UIView])
+    static func addLoaderToViews(let views : [UIView])
     {
         CATransaction.begin()
         views.forEach { $0.ld_addLoader() }
         CATransaction.commit()
     }
     
-    public static func removeLoaderFromViews(let views: [UIView])
+    static func removeLoaderFromViews(let views: [UIView])
     {
         CATransaction.begin()
         views.forEach { $0.ld_removeLoader() }
         CATransaction.commit()
     }
-
-    public static func addLoaderToTableView(let table : UITableView )
+    
+    public static func addLoaderTo(let list : ListLoadable )
     {
-        self.addLoaderToViews(table.ld_visibleContentViews())
+        self.addLoaderToViews(list.ld_visibleContentViews())
     }
     
-    public static func addLoaderToCollectionView(let coll : UICollectionView )
+    
+    public static func removeLoaderFrom(let list : ListLoadable )
     {
-        self.addLoaderToViews(coll.ld_visibleContentViews())
-    }
-
-    public static func removeLoaderFromTableView(let table : UITableView )
-    {
-        self.removeLoaderFromViews(table.ld_visibleContentViews())
+        self.removeLoaderFromViews(list.ld_visibleContentViews())
     }
     
-    public static func removeLoaderFromCollectionView(let coll : UICollectionView )
-    {
-        self.removeLoaderFromViews(coll.ld_visibleContentViews())
-    }
-
+    
 }
 
 class CutoutView : UIView
@@ -93,15 +89,12 @@ class CutoutView : UIView
     override func drawRect(rect: CGRect) {
         
         super.drawRect(rect)
-        
         let context = UIGraphicsGetCurrentContext()
-        
         CGContextSetFillColorWithColor(context, UIColor.whiteColor().CGColor)
-        
         CGContextFillRect(context, self.bounds)
         
         for view in (self.superview?.subviews)! {
-            
+
             if view != self {
                 
                 CGContextSetBlendMode(context, .Clear);

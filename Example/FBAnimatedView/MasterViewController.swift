@@ -39,14 +39,14 @@ class MasterViewController: UITableViewController {
         super.viewDidAppear(animated)
         
         self.tableView.reloadData()
-        Loader.addLoaderToTableView(self.tableView)
+        Loader.addLoaderTo(self.tableView)
       //  NSTimer.scheduledTimerWithTimeInterval(4.0, target: self, selector: "loaded", userInfo: nil, repeats: false)
     }
     
     
     func loaded()
     {
-        Loader.removeLoaderFromTableView(self.tableView)
+        Loader.removeLoaderFrom(self.tableView)
     }
 
     override func didReceiveMemoryWarning() {
