@@ -14,7 +14,7 @@
 		BB50E2901C3F7DE1009A9F07 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BB50E28E1C3F7DE1009A9F07 /* LaunchScreen.storyboard */; };
 		BB50E29B1C3F7DE1009A9F07 /* FBAnimatedViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB50E29A1C3F7DE1009A9F07 /* FBAnimatedViewTests.swift */; };
 		BB50E2A61C3F7DE1009A9F07 /* FBAnimatedViewUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB50E2A51C3F7DE1009A9F07 /* FBAnimatedViewUITests.swift */; };
-		BB50E2B81C3FB427009A9F07 /* Loader.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB50E2B71C3FB427009A9F07 /* Loader.swift */; settings = {ASSET_TAGS = (); }; };
+		BB50E2B81C3FB427009A9F07 /* Loader.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB50E2B71C3FB427009A9F07 /* Loader.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -195,13 +195,16 @@
 				TargetAttributes = {
 					BB50E27F1C3F7DE1009A9F07 = {
 						CreatedOnToolsVersion = 7.0;
+						LastSwiftMigration = 0820;
 					};
 					BB50E2951C3F7DE1009A9F07 = {
 						CreatedOnToolsVersion = 7.0;
+						LastSwiftMigration = 0820;
 						TestTargetID = BB50E27F1C3F7DE1009A9F07;
 					};
 					BB50E2A01C3F7DE1009A9F07 = {
 						CreatedOnToolsVersion = 7.0;
+						LastSwiftMigration = 0820;
 						TestTargetID = BB50E27F1C3F7DE1009A9F07;
 					};
 				};
@@ -406,6 +409,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.Cleartrip.FBAnimatedView;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -417,6 +421,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.Cleartrip.FBAnimatedView;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};
@@ -428,6 +433,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.Cleartrip.FBAnimatedViewTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FBAnimatedView.app/FBAnimatedView";
 			};
 			name = Debug;
@@ -440,6 +446,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.Cleartrip.FBAnimatedViewTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FBAnimatedView.app/FBAnimatedView";
 			};
 			name = Release;
@@ -451,6 +458,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.Cleartrip.FBAnimatedViewUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 				TEST_TARGET_NAME = FBAnimatedView;
 				USES_XCTRUNNER = YES;
 			};
@@ -463,6 +471,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.Cleartrip.FBAnimatedViewUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 				TEST_TARGET_NAME = FBAnimatedView;
 				USES_XCTRUNNER = YES;
 			};
