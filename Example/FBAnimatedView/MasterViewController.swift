@@ -14,14 +14,14 @@ class MasterViewController: UITableViewController {
         super.viewDidAppear(animated)
         
         self.tableView.reloadData()
-        Loader.addLoaderTo(self.tableView)
+        Loader.addLoader(to: self.tableView)
         Timer.scheduledTimer(timeInterval: 4.0, target: self, selector: #selector(MasterViewController.loaded), userInfo: nil, repeats: false)
     }
     
     
     func loaded()
     {
-        Loader.removeLoaderFrom(self.tableView)
+        Loader.removeLoader(from: self.tableView)
     }
 
     override func numberOfSections(in tableView: UITableView) -> Int {
