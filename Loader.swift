@@ -30,18 +30,24 @@ extension UICollectionView: ListLoadable {
     }
 }
 
+func curry<T>(a: T, f: @escaping (_ a: T, _ b: T) -> T) -> (T) -> T {
+    return { f($0, a) }
+}
+
 extension UIColor {
-    
+
+    static let div = curry(a: CGFloat(255.0), f: /)
+
     static var backgroundFadedGrey: UIColor {
-        return UIColor(red: (246.0/255.0), green: (247.0/255.0), blue: (248.0/255.0), alpha: 1)
+        return UIColor(red: div(246.0), green: div(247.0), blue: div(248.0), alpha: 1)
     }
-    
+
     static var gradientFirstStop: UIColor {
-        return  UIColor(red: (238.0/255.0), green: (238.0/255.0), blue: (238.0/255.0), alpha: 1.0)
+        return  UIColor(red: div(238.0), green: div(238.0), blue: div(238.0), alpha: 1.0)
     }
-    
+
     static var gradientSecondStop: UIColor {
-        return UIColor(red: (221.0/255.0), green: (221.0/255.0), blue:(221.0/255.0) , alpha: 1.0);
+        return UIColor(red: div(221.0), green: div(221.0), blue: div(221.0) , alpha: 1.0);
     }
 }
 
@@ -175,10 +181,6 @@ extension UIView {
             view.alpha = 1
         }
     }
-    
-    func curry<T>(a: T, f: @escaping (_ a: T, _ b: T) -> T) -> (T) -> T {
-        return { f(a, $0) }
-    }
 
     func configureAndAddAnimationToGradient(_ gradient: CAGradientLayer) {
         let gradientWidth = Loader.shared.config.gradientWidth
@@ -226,7 +228,7 @@ extension UIView {
 
         self.gradient = gradient
     }
-    
+
     func addCutoutView() {
         let cutout = CutoutView(frame: bounds)
         cutout.backgroundColor = UIColor.clear
@@ -234,11 +236,11 @@ extension UIView {
         addSubview(cutout)
         cutout.setNeedsDisplay()
         cutout.boundInside(self)
-        
+    
         for view in subviews where view != cutout {
             view.alpha = 0
         }
-        
+    
         cutoutView = cutout
     }
 }
