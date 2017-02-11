@@ -167,7 +167,7 @@ extension UIView {
 
     public func ld_addLoader() {
         let gradient = CAGradientLayer()
-        gradient.frame = CGRect(x: 0, y: 0, width: bounds.width, height: bounds.height)
+        gradient.frame = CGRect(origin: .zero, size: bounds.size)
         layer.insertSublayer(gradient, at: 0)
 
         configureAndAddAnimation(to: gradient)
@@ -223,7 +223,7 @@ extension UIView {
             NSNumber(value: add(1.0))
         ]
 
-        gradientAnimation.repeatCount = Float.infinity
+        gradientAnimation.repeatCount = .infinity
         gradientAnimation.fillMode = kCAFillModeForwards
         gradientAnimation.isRemovedOnCompletion = false
         gradientAnimation.duration = loaderDuration
