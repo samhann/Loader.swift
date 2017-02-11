@@ -8,7 +8,7 @@
 
 import UIKit
 
-@objc public protocol ListLoadable {
+public protocol ListLoadable {
     var ld_visibleContentViews: [UIView] { get }
 }
 
@@ -30,43 +30,51 @@ extension UICollectionView: ListLoadable {
     }
 }
 
-func curry<T>(a: T, f: @escaping (_ a: T, _ b: T) -> T) -> (T) -> T {
+func curry<T>(a: T, f: @escaping(_ a: T, _ b: T) -> T) -> (T) -> T {
     return { f($0, a) }
 }
 
 extension UIColor {
 
-    static let div = curry(a: CGFloat(255.0), f: /)
+    convenience init(r: CGFloat, g: CGFloat, b: CGFloat, a: CGFloat = 1) {
+        self.init(red: r / 255, green: g / 255, blue: b / 255, alpha: a)
+    }
 
     static var backgroundFadedGrey: UIColor {
-        return UIColor(red: div(246.0), green: div(247.0), blue: div(248.0), alpha: 1)
+        return UIColor(r: 247, g: 247, b: 247)
     }
 
     static var gradientFirstStop: UIColor {
-        return  UIColor(red: div(238.0), green: div(238.0), blue: div(238.0), alpha: 1.0)
+        return UIColor(r: 238, g: 238, b: 238)
     }
 
     static var gradientSecondStop: UIColor {
-        return UIColor(red: div(221.0), green: div(221.0), blue: div(221.0) , alpha: 1.0);
+        return UIColor(r: 230, g: 230, b: 230)
     }
 }
 
-extension UIView{
-    
+extension UIView {
+
     func boundInside(_ superView: UIView) {
-        
+
         translatesAutoresizingMaskIntoConstraints = false
-        superView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|-0-[subview]-0-|", options: NSLayoutFormatOptions(), metrics: nil, views:["subview": self]))
-        superView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-0-[subview]-0-|", options: NSLayoutFormatOptions(), metrics: nil, views:["subview": self]))
+        superView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|-0-[subview]-0-|", options: NSLayoutFormatOptions(), metrics: nil, views: ["subview": self]))
+        superView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-0-[subview]-0-|", options: NSLayoutFormatOptions(), metrics: nil, views: ["subview": self]))
     }
 }
 
-public struct Config {
-    let loaderDuration: Double
-    let gradientWidth: Double
-    let gradientFirstStop: Double
+public protocol Configable {
+    var loaderDuration: Double { set get }
+    var gradientWidth: Double { set get }
+    var gradientFirstStop: Double { set get }
+}
 
-    init(loaderDuration: Double = 0.85, gradientWidth: Double = 0.17, gradientFirstStop: Double = 0.1) {
+public struct Config: Configable {
+    public var gradientWidth: Double
+    public var loaderDuration: Double
+    public var gradientFirstStop: Double
+
+    init(loaderDuration: Double = 1, gradientWidth: Double = 0.17, gradientFirstStop: Double = 0.1) {
         self.loaderDuration = loaderDuration
         self.gradientWidth = gradientWidth
         self.gradientFirstStop = gradientFirstStop
@@ -74,32 +82,28 @@ public struct Config {
 }
 
 open class Loader {
-    
-    static let shared = Loader()
-    
-    var config: Config!
-    
-    private init() {}
-    
-    static func addLoaderToViews(_ views: [UIView]) {
+
+    static var config: Configable!
+
+    static func addLoader(to views: [UIView]) {
         CATransaction.begin()
         views.forEach { $0.ld_addLoader() }
         CATransaction.commit()
     }
 
-    static func removeLoaderFromViews(_ views: [UIView]) {
+    static func removeLoader(from views: [UIView]) {
         CATransaction.begin()
         views.forEach { $0.ld_removeLoader() }
         CATransaction.commit()
     }
 
-    open static func addLoader(to list: ListLoadable, config: Config = Config()) {
-        shared.config = config
-        addLoaderToViews(list.ld_visibleContentViews)
+    open static func addLoader(to listView: ListLoadable, config: Configable = Config()) {
+        Loader.config = config
+        addLoader(to: listView.ld_visibleContentViews)
     }
 
-    open static func removeLoader(from list: ListLoadable) {
-        removeLoaderFromViews(list.ld_visibleContentViews)
+    open static func removeLoader(from listView: ListLoadable) {
+        removeLoader(from: listView.ld_visibleContentViews)
     }
 }
 
@@ -110,7 +114,7 @@ class CutoutView: UIView {
 
         let context = UIGraphicsGetCurrentContext()
         context?.setFillColor(UIColor.white.cgColor)
-        context?.fill(self.bounds)
+        context?.fill(bounds)
 
         for view in superview!.subviews where view != self {
 
@@ -119,7 +123,6 @@ class CutoutView: UIView {
             context?.fill(view.frame)
         }
     }
-    
 
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -136,27 +139,27 @@ extension CGFloat {
 }
 
 extension UIView {
-    
+
     struct AssociatedKey {
         static var cutoutHandle: UInt8 = 0
         static var gradientHandle: UInt8 = 0
     }
-    
+
     var cutoutView: UIView? {
         set {
             objc_setAssociatedObject(self, &AssociatedKey.cutoutHandle, newValue, .OBJC_ASSOCIATION_RETAIN)
         }
-        
+
         get {
             return objc_getAssociatedObject(self, &AssociatedKey.cutoutHandle) as? UIView
         }
     }
-    
+
     var gradient: CAGradientLayer? {
         set {
             objc_setAssociatedObject(self, &AssociatedKey.gradientHandle, newValue, .OBJC_ASSOCIATION_RETAIN)
         }
-        
+
         get {
             return objc_getAssociatedObject(self, &AssociatedKey.gradientHandle) as? CAGradientLayer
         }
@@ -164,30 +167,32 @@ extension UIView {
 
     public func ld_addLoader() {
         let gradient = CAGradientLayer()
-        gradient.frame = CGRect(x: 0, y: 0, width: bounds.width , height: bounds.height)
-        layer.insertSublayer(gradient, at:0)
-        
-        configureAndAddAnimationToGradient(gradient)
+        gradient.frame = CGRect(x: 0, y: 0, width: bounds.width, height: bounds.height)
+        layer.insertSublayer(gradient, at: 0)
+
+        configureAndAddAnimation(to: gradient)
         addCutoutView()
     }
-    
+
     public func ld_removeLoader() {
-        
+
         cutoutView?.removeFromSuperview()
         gradient?.removeAllAnimations()
         gradient?.removeFromSuperlayer()
-        
+
+        cutoutView = nil
+        gradient = nil
         for view in subviews {
             view.alpha = 1
         }
     }
 
-    func configureAndAddAnimationToGradient(_ gradient: CAGradientLayer) {
-        let gradientWidth = Loader.shared.config.gradientWidth
+    func configureAndAddAnimation(to gradient: CAGradientLayer) {
+        let gradientWidth = Loader.config.gradientWidth
         let add = curry(a: gradientWidth, f: +)
-        let gradientFirstStop = Loader.shared.config.gradientFirstStop
-        let loaderDuration = Loader.shared.config.loaderDuration
-        
+        let gradientFirstStop = Loader.config.gradientFirstStop
+        let loaderDuration = Loader.config.loaderDuration
+
         gradient.startPoint = CGPoint(x: add(-1.0), y: 0)
         gradient.endPoint = CGPoint(x: add(1), y: 0)
 
@@ -198,7 +203,7 @@ extension UIView {
             UIColor.gradientFirstStop.cgColor,
             UIColor.backgroundFadedGrey.cgColor
         ]
-        
+
         let startLocations = [
             NSNumber(value: gradient.startPoint.x.doubleValue),
             NSNumber(value: gradient.startPoint.x.doubleValue),
@@ -206,7 +211,6 @@ extension UIView {
             NSNumber(value: gradientWidth),
             NSNumber(value: add(1.0))
         ]
-        
 
         gradient.locations = startLocations
         let gradientAnimation = CABasicAnimation(keyPath: "locations")
@@ -223,8 +227,7 @@ extension UIView {
         gradientAnimation.fillMode = kCAFillModeForwards
         gradientAnimation.isRemovedOnCompletion = false
         gradientAnimation.duration = loaderDuration
-        gradient.add(gradientAnimation ,forKey:"locations")
-        
+        gradient.add(gradientAnimation, forKey: "locations")
 
         self.gradient = gradient
     }
@@ -236,12 +239,11 @@ extension UIView {
         addSubview(cutout)
         cutout.setNeedsDisplay()
         cutout.boundInside(self)
-    
+
         for view in subviews where view != cutout {
             view.alpha = 0
         }
-    
+
         cutoutView = cutout
     }
 }
-

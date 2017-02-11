@@ -12,15 +12,13 @@ class MasterViewController: UITableViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
+
         self.tableView.reloadData()
         Loader.addLoader(to: self.tableView)
         Timer.scheduledTimer(timeInterval: 4.0, target: self, selector: #selector(MasterViewController.loaded), userInfo: nil, repeats: false)
     }
-    
-    
-    func loaded()
-    {
+
+    func loaded() {
         Loader.removeLoader(from: self.tableView)
     }
 
@@ -37,4 +35,3 @@ class MasterViewController: UITableViewController {
         return cell
     }
 }
-
