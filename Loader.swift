@@ -8,231 +8,242 @@
 
 import UIKit
 
-@objc public protocol ListLoadable
-{
-    func ld_visibleContentViews()->[UIView]
+public protocol ListLoadable {
+    var ld_visibleContentViews: [UIView] { get }
 }
 
-extension UITableView : ListLoadable
-{
-    public func ld_visibleContentViews()->[UIView]
-    {
-        
-        return (self.visibleCells as NSArray).value(forKey: "contentView") as! [UIView]
-        
+extension ListLoadable {
+    func ld_visibleContentViews(for views: [UIView]) -> [UIView] {
+        return views.flatMap { $0.value(forKey: "contentView") as? UIView }
     }
 }
 
-extension UICollectionView : ListLoadable
-{
-    public func ld_visibleContentViews()->[UIView]
-    {
-        
-        return (self.visibleCells as NSArray).value(forKey: "contentView") as! [UIView]
-        
+extension UITableView: ListLoadable {
+    public var ld_visibleContentViews: [UIView] {
+        return ld_visibleContentViews(for: visibleCells)
     }
+}
+
+extension UICollectionView: ListLoadable {
+    public var ld_visibleContentViews: [UIView] {
+        return ld_visibleContentViews(for: visibleCells)
+    }
+}
+
+func curry<T>(a: T, f: @escaping (_ a: T, _ b: T) -> T) -> (T) -> T {
+    return { f($0, a) }
 }
 
 extension UIColor {
-    
-    static func backgroundFadedGrey()->UIColor
-    {
-        return UIColor(red: (246.0/255.0), green: (247.0/255.0), blue: (248.0/255.0), alpha: 1)
+
+    convenience init(r: CGFloat, g: CGFloat, b: CGFloat, a: CGFloat = 1) {
+        self.init(red: r / 255, green: g / 255, blue: b / 255, alpha: a)
     }
-    
-    static func gradientFirstStop()->UIColor
-    {
-        return  UIColor(red: (238.0/255.0), green: (238.0/255.0), blue: (238.0/255.0), alpha: 1.0)
+
+    static var backgroundFadedGrey: UIColor {
+        return UIColor(r: 247, g: 247, b: 247)
     }
-    
-    static func gradientSecondStop()->UIColor
-    {
-        return UIColor(red: (221.0/255.0), green: (221.0/255.0), blue:(221.0/255.0) , alpha: 1.0);
+
+    static var gradientFirstStop: UIColor {
+        return UIColor(r: 238, g: 238, b: 238)
+    }
+
+    static var gradientSecondStop: UIColor {
+        return UIColor(r: 230, g: 230, b: 230)
     }
 }
 
-extension UIView{
-    
-    func boundInside(_ superView: UIView){
-        
-        self.translatesAutoresizingMaskIntoConstraints = false
-        superView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|-0-[subview]-0-|", options: NSLayoutFormatOptions(), metrics:nil, views:["subview":self]))
-        superView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-0-[subview]-0-|", options: NSLayoutFormatOptions(), metrics:nil, views:["subview":self]))
-        
-        
+extension UIView {
+
+    func boundInside(_ superView: UIView) {
+
+        translatesAutoresizingMaskIntoConstraints = false
+        superView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|-0-[subview]-0-|", options: NSLayoutFormatOptions(), metrics: nil, views: ["subview": self]))
+        superView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-0-[subview]-0-|", options: NSLayoutFormatOptions(), metrics: nil, views: ["subview": self]))
     }
 }
 
-open class Loader
-{
-    static func addLoaderToViews(_ views : [UIView])
-    {
+public protocol Configable {
+    var loaderDuration: Double { set get }
+    var gradientWidth: Double { set get }
+    var gradientFirstStop: Double { set get }
+}
+
+public struct Config: Configable {
+    public var gradientWidth: Double
+    public var loaderDuration: Double
+    public var gradientFirstStop: Double
+
+    init(loaderDuration: Double = 1, gradientWidth: Double = 0.17, gradientFirstStop: Double = 0.1) {
+        self.loaderDuration = loaderDuration
+        self.gradientWidth = gradientWidth
+        self.gradientFirstStop = gradientFirstStop
+    }
+}
+
+open class Loader {
+
+    static var config: Configable!
+
+    static func addLoader(to views: [UIView]) {
         CATransaction.begin()
         views.forEach { $0.ld_addLoader() }
         CATransaction.commit()
     }
-    
-    static func removeLoaderFromViews(_ views: [UIView])
-    {
+
+    static func removeLoader(from views: [UIView]) {
         CATransaction.begin()
         views.forEach { $0.ld_removeLoader() }
         CATransaction.commit()
     }
-    
-    open static func addLoaderTo(_ list : ListLoadable )
-    {
-        self.addLoaderToViews(list.ld_visibleContentViews())
+
+    open static func addLoader(to listView: ListLoadable, config: Configable = Config()) {
+        Loader.config = config
+        addLoader(to: listView.ld_visibleContentViews)
     }
-    
-    
-    open static func removeLoaderFrom(_ list : ListLoadable )
-    {
-        self.removeLoaderFromViews(list.ld_visibleContentViews())
+
+    open static func removeLoader(from listView: ListLoadable) {
+        removeLoader(from: listView.ld_visibleContentViews)
     }
-    
-    
 }
 
-class CutoutView : UIView
-{
-    
+class CutoutView: UIView {
+
     override func draw(_ rect: CGRect) {
-        
         super.draw(rect)
+
         let context = UIGraphicsGetCurrentContext()
         context?.setFillColor(UIColor.white.cgColor)
-        context?.fill(self.bounds)
-        
-        for view in (self.superview?.subviews)! {
+        context?.fill(bounds)
 
-            if view != self {
-                
-                context?.setBlendMode(.clear);
-                context?.setFillColor(UIColor.clear.cgColor)
-                context?.fill(view.frame)
-            }
+        for view in superview!.subviews where view != self {
+
+            context?.setBlendMode(.clear)
+            context?.setFillColor(UIColor.clear.cgColor)
+            context?.fill(view.frame)
         }
     }
-    
-    
+
     override func layoutSubviews() {
-        
-        self.setNeedsDisplay()
-        self.superview?.ld_getGradient()?.frame = (self.superview?.bounds)!
+        super.layoutSubviews()
+
+        setNeedsDisplay()
+        superview?.gradient?.frame = superview!.bounds
     }
 }
 
-// TODO :- Allow caller to tweak these
-
-var cutoutHandle: UInt8         = 0
-var gradientHandle: UInt8       = 0
-var loaderDuration              = 0.85
-var gradientWidth               = 0.17
-var gradientFirstStop           = 0.1
-
-extension CGFloat
-{
-    func doubleValue()->Double
-    {
+extension CGFloat {
+    var doubleValue: Double {
         return Double(self)
     }
-    
 }
 
-extension UIView
-{
-    public func ld_getCutoutView()->UIView?
-    {
-        return objc_getAssociatedObject(self, &cutoutHandle) as! UIView?
+extension UIView {
+
+    struct AssociatedKey {
+        static var cutoutHandle: UInt8 = 0
+        static var gradientHandle: UInt8 = 0
     }
-    
-    func ld_setCutoutView(_ aView : UIView)
-    {
-        return objc_setAssociatedObject(self, &cutoutHandle, aView, .OBJC_ASSOCIATION_RETAIN)
+
+    var cutoutView: UIView? {
+        set {
+            objc_setAssociatedObject(self, &AssociatedKey.cutoutHandle, newValue, .OBJC_ASSOCIATION_RETAIN)
+        }
+
+        get {
+            return objc_getAssociatedObject(self, &AssociatedKey.cutoutHandle) as? UIView
+        }
     }
-    
-    func ld_getGradient()->CAGradientLayer?
-    {
-        return objc_getAssociatedObject(self, &gradientHandle) as! CAGradientLayer?
+
+    var gradient: CAGradientLayer? {
+        set {
+            objc_setAssociatedObject(self, &AssociatedKey.gradientHandle, newValue, .OBJC_ASSOCIATION_RETAIN)
+        }
+
+        get {
+            return objc_getAssociatedObject(self, &AssociatedKey.gradientHandle) as? CAGradientLayer
+        }
     }
-    
-    func ld_setGradient(_ aLayer : CAGradientLayer)
-    {
-        return objc_setAssociatedObject(self, &gradientHandle, aLayer, .OBJC_ASSOCIATION_RETAIN)
+
+    public func ld_addLoader() {
+        let gradient = CAGradientLayer()
+        gradient.frame = CGRect(origin: .zero, size: bounds.size)
+        layer.insertSublayer(gradient, at: 0)
+
+        configureAndAddAnimation(to: gradient)
+        addCutoutView()
     }
-    
-    public func ld_addLoader()
-    {
-        let gradient: CAGradientLayer = CAGradientLayer()
-        gradient.frame = CGRect(x: 0, y: 0, width: self.bounds.size.width , height: self.bounds.size.height)
-        self.layer.insertSublayer(gradient, at:0)
-        
-        self.configureAndAddAnimationToGradient(gradient)
-        self.addCutoutView()
-    }
-    
-    public func ld_removeLoader()
-    {
-        self.ld_getCutoutView()?.removeFromSuperview()
-        self.ld_getGradient()?.removeAllAnimations()
-        self.ld_getGradient()?.removeFromSuperlayer()
-        
-        for view in self.subviews {
+
+    public func ld_removeLoader() {
+
+        cutoutView?.removeFromSuperview()
+        gradient?.removeAllAnimations()
+        gradient?.removeFromSuperlayer()
+
+        cutoutView = nil
+        gradient = nil
+        for view in subviews {
             view.alpha = 1
         }
     }
-    
-    
-    func configureAndAddAnimationToGradient(_ gradient : CAGradientLayer)
-    {
-        gradient.startPoint = CGPoint(x: -1.0 + CGFloat(gradientWidth), y: 0)
-        gradient.endPoint = CGPoint(x: 1.0 + CGFloat(gradientWidth), y: 0)
-        
+
+    func configureAndAddAnimation(to gradient: CAGradientLayer) {
+        let gradientWidth = Loader.config.gradientWidth
+        let add = curry(a: gradientWidth, f: +)
+        let gradientFirstStop = Loader.config.gradientFirstStop
+        let loaderDuration = Loader.config.loaderDuration
+
+        gradient.startPoint = CGPoint(x: add(-1.0), y: 0)
+        gradient.endPoint = CGPoint(x: add(1), y: 0)
+
         gradient.colors = [
-            UIColor.backgroundFadedGrey().cgColor,
-            UIColor.gradientFirstStop().cgColor,
-            UIColor.gradientSecondStop().cgColor,
-            UIColor.gradientFirstStop().cgColor,
-            UIColor.backgroundFadedGrey().cgColor
+            UIColor.backgroundFadedGrey.cgColor,
+            UIColor.gradientFirstStop.cgColor,
+            UIColor.gradientSecondStop.cgColor,
+            UIColor.gradientFirstStop.cgColor,
+            UIColor.backgroundFadedGrey.cgColor,
         ]
-        
-        let startLocations = [NSNumber(value: gradient.startPoint.x.doubleValue() as Double),NSNumber(value: gradient.startPoint.x.doubleValue() as Double),NSNumber(value: 0 as Double),NSNumber(value: gradientWidth as Double),NSNumber(value: 1 + gradientWidth as Double)]
-        
-        
+
+        let startLocations = [
+            NSNumber(value: gradient.startPoint.x.doubleValue),
+            NSNumber(value: gradient.startPoint.x.doubleValue),
+            NSNumber(value: 0),
+            NSNumber(value: gradientWidth),
+            NSNumber(value: add(1.0)),
+        ]
+
         gradient.locations = startLocations
         let gradientAnimation = CABasicAnimation(keyPath: "locations")
         gradientAnimation.fromValue = startLocations
-        gradientAnimation.toValue = [NSNumber(value: 0 as Double),NSNumber(value: 1 as Double),NSNumber(value: 1 as Double),NSNumber(value: 1 + (gradientWidth - gradientFirstStop) as Double),NSNumber(value: 1 + gradientWidth as Double)]
-        
-        gradientAnimation.repeatCount = Float.infinity
+        gradientAnimation.toValue = [
+            NSNumber(value: 0),
+            NSNumber(value: 1),
+            NSNumber(value: 1),
+            NSNumber(value: add(1.0) - gradientFirstStop),
+            NSNumber(value: add(1.0)),
+        ]
+
+        gradientAnimation.repeatCount = .infinity
         gradientAnimation.fillMode = kCAFillModeForwards
         gradientAnimation.isRemovedOnCompletion = false
         gradientAnimation.duration = loaderDuration
-        gradient.add(gradientAnimation ,forKey:"locations")
-        
-        
-        self.ld_setGradient(gradient)
-        
+        gradient.add(gradientAnimation, forKey: "locations")
+
+        self.gradient = gradient
     }
-    
-    func addCutoutView()
-    {
-        let cutout = CutoutView()
-        cutout.frame = self.bounds
+
+    func addCutoutView() {
+        let cutout = CutoutView(frame: bounds)
         cutout.backgroundColor = UIColor.clear
-        
-        self.addSubview(cutout)
+
+        addSubview(cutout)
         cutout.setNeedsDisplay()
         cutout.boundInside(self)
-        
-        for view in self.subviews {
-            if view != cutout {
-                view.alpha = 0
-            }
+
+        for view in subviews where view != cutout {
+            view.alpha = 0
         }
-        
-        
-        self.ld_setCutoutView(cutout)
+
+        cutoutView = cutout
     }
 }
-
