@@ -30,7 +30,7 @@ extension UICollectionView: ListLoadable {
     }
 }
 
-func curry<T>(a: T, f: @escaping(_ a: T, _ b: T) -> T) -> (T) -> T {
+func curry<T>(a: T, f: @escaping (_ a: T, _ b: T) -> T) -> (T) -> T {
     return { f($0, a) }
 }
 
@@ -201,7 +201,7 @@ extension UIView {
             UIColor.gradientFirstStop.cgColor,
             UIColor.gradientSecondStop.cgColor,
             UIColor.gradientFirstStop.cgColor,
-            UIColor.backgroundFadedGrey.cgColor
+            UIColor.backgroundFadedGrey.cgColor,
         ]
 
         let startLocations = [
@@ -209,7 +209,7 @@ extension UIView {
             NSNumber(value: gradient.startPoint.x.doubleValue),
             NSNumber(value: 0),
             NSNumber(value: gradientWidth),
-            NSNumber(value: add(1.0))
+            NSNumber(value: add(1.0)),
         ]
 
         gradient.locations = startLocations
@@ -220,7 +220,7 @@ extension UIView {
             NSNumber(value: 1),
             NSNumber(value: 1),
             NSNumber(value: add(1.0) - gradientFirstStop),
-            NSNumber(value: add(1.0))
+            NSNumber(value: add(1.0)),
         ]
 
         gradientAnimation.repeatCount = .infinity

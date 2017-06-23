@@ -11,14 +11,14 @@ import UIKit
 public extension UITableView {
     public func ld_visibleContentViews() -> [UIView] {
 
-        return (self.visibleCells as NSArray).valueForKey("contentView") as! [UIView]
+        return (visibleCells as NSArray).valueForKey("contentView") as! [UIView]
     }
 }
 
 public extension UICollectionView {
     public func ld_visibleContentViews() -> [UIView] {
 
-        return (self.visibleCells() as NSArray).valueForKey("contentView") as! [UIView]
+        return (visibleCells() as NSArray).valueForKey("contentView") as! [UIView]
     }
 }
 
@@ -51,19 +51,19 @@ public class Loader {
     }
 
     public static func addLoaderToTableView(let table: UITableView) {
-        self.addLoaderToViews(table.ld_visibleContentViews())
+        addLoaderToViews(table.ld_visibleContentViews())
     }
 
     public static func addLoaderToCollectionView(let coll: UICollectionView) {
-        self.addLoaderToViews(coll.ld_visibleContentViews())
+        addLoaderToViews(coll.ld_visibleContentViews())
     }
 
     public static func removeLoaderFromTableView(let table: UITableView) {
-        self.removeLoaderFromViews(table.ld_visibleContentViews())
+        removeLoaderFromViews(table.ld_visibleContentViews())
     }
 
     public static func removeLoaderFromCollectionView(let coll: UICollectionView) {
-        self.removeLoaderFromViews(coll.ld_visibleContentViews())
+        removeLoaderFromViews(coll.ld_visibleContentViews())
     }
 }
 
@@ -77,9 +77,9 @@ class CutoutView: UIView {
 
         CGContextSetFillColorWithColor(context, UIColor.whiteColor().CGColor)
 
-        CGContextFillRect(context, self.bounds)
+        CGContextFillRect(context, bounds)
 
-        for view in (self.superview?.subviews)! {
+        for view in (superview?.subviews)! {
 
             if view != self {
 
@@ -113,19 +113,19 @@ extension UIView {
 
     public func ld_addLoader() {
         let gradient: CAGradientLayer = CAGradientLayer()
-        gradient.frame = CGRectMake(0, 0, self.bounds.size.width, self.bounds.size.height)
-        self.layer.insertSublayer(gradient, atIndex: 0)
+        gradient.frame = CGRectMake(0, 0, bounds.size.width, bounds.size.height)
+        layer.insertSublayer(gradient, atIndex: 0)
 
-        self.configureAndAddAnimationToGradient(gradient)
-        self.addCutoutView()
+        configureAndAddAnimationToGradient(gradient)
+        addCutoutView()
     }
 
     public func ld_removeLoader() {
-        self.ld_getCutoutView()?.removeFromSuperview()
-        self.ld_getGradient()?.removeAllAnimations()
-        self.ld_getGradient()?.removeFromSuperlayer()
+        ld_getCutoutView()?.removeFromSuperview()
+        ld_getGradient()?.removeAllAnimations()
+        ld_getGradient()?.removeFromSuperlayer()
 
-        for view in self.subviews {
+        for view in subviews {
             view.alpha = 1
         }
     }
@@ -139,7 +139,7 @@ extension UIView {
             UIColor.gradientFirstStop().CGColor,
             UIColor.gradientSecondStop().CGColor,
             UIColor.gradientFirstStop().CGColor,
-            UIColor.backgroundFadedGrey().CGColor
+            UIColor.backgroundFadedGrey().CGColor,
         ]
 
         gradient.locations = [NSNumber(double: -1.25), NSNumber(double: -1.25), NSNumber(double: 0), NSNumber(double: 0.25), NSNumber(double: 1.25)]
@@ -156,22 +156,22 @@ extension UIView {
         gradientAnimation.duration = 1
         gradient.addAnimation(gradientAnimation, forKey: "locations")
 
-        self.ld_setGradient(gradient)
+        ld_setGradient(gradient)
     }
 
     func addCutoutView() {
         let cutout = CutoutView()
-        cutout.frame = self.bounds
+        cutout.frame = bounds
         cutout.backgroundColor = UIColor.clearColor()
 
-        self.insertSubview(cutout, atIndex: 1)
+        insertSubview(cutout, atIndex: 1)
         cutout.setNeedsDisplay()
 
-        for view in self.subviews {
+        for view in subviews {
             if view != cutout {
                 view.alpha = 0
             }
         }
-        self.ld_setCutoutView(cutout)
+        ld_setCutoutView(cutout)
     }
 }

@@ -13,20 +13,20 @@ class MasterViewController: UITableViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
-        self.tableView.reloadData()
-        Loader.addLoader(to: self.tableView)
+        tableView.reloadData()
+        Loader.addLoader(to: tableView)
         Timer.scheduledTimer(timeInterval: 4.0, target: self, selector: #selector(MasterViewController.loaded), userInfo: nil, repeats: false)
     }
 
     func loaded() {
-        Loader.removeLoader(from: self.tableView)
+        Loader.removeLoader(from: tableView)
     }
 
-    override func numberOfSections(in tableView: UITableView) -> Int {
+    override func numberOfSections(in _: UITableView) -> Int {
         return 1
     }
 
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
         return 3
     }
 
